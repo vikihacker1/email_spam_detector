@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analysis Results</title>
+    <style>
+        body { font-family: sans-serif; line-height: 1.6; margin: 2em; background: #f4f4f4; }
+        .container { max-width: 800px; margin: auto; background: #fff; padding: 2em; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; border-bottom: 2px solid #eee; padding-bottom: 5px; }
+        .result-box { padding: 1em; border-radius: 5px; margin-bottom: 1em; color: #fff; }
+        .verdict-high { background: #d9534f; }
+        .verdict-suspicious { background: #f0ad4e; }
+        .verdict-low { background: #5cb85c; }
+        .details-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5em; }
+        .detail-card { background: #f9f9f9; padding: 1em; border-radius: 5px; }
+        code { background: #eee; padding: 2px 5px; border-radius: 3px; }
+        .ok { color: green; } .warn { color: orange; } .fail { color: red; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Analysis Report</h1>
+
+        {% set verdict_class = 'verdict-low' %}
+        {% if 'HIGH RISK' in results.verdict %}
+            {% set verdict_class = 'verdict-high' %}
+        {% elif 'SUSPICIOUS' in results.verdict %}
+            {% set verdict_class = 'verdict-suspicious' %}
+        {% endif %}
+
+        <div class="result-box {{ verdict_class }}">
+            <h2>Overall Verdict: {{ results.verdict }}</h2>
+            <p><strong>Risk Score:</strong> {{ results.risk_score }} / 100</p>
+        </div>
+
+        <div class="details-grid">
+            <div class="detail-card">
+                <h3>🔒 Authentication</h3>
+                <p><strong>SPF:</strong> {{ results.auth.SPF }}</p>
+                <p><strong>DKIM:</strong> <span class="{{ 'fail' if 'FAIL' in results.auth.DKIM else 'ok' }}">{{ results.auth.DKIM }}</span></p>
+                <p><strong>DMARC:</strong> {{ results.auth.DMARC }}</p>
+            </div>
+            <div class="detail-card">
+                <h3>📋 Header Analysis</h3>
+                <p><strong>From:</strong> <code>{{ results.headers.From }}</code></p>
+                <p><strong>Reply-To:</strong> <code>{{ results.headers['Reply-To'] }}</code></p>
+                <p><strong>Mismatch Check:</strong> <span class="{{ 'warn' if 'WARNING' in results.headers.Mismatch else 'ok' }}">{{ results.headers.Mismatch }}</span></p>
+            </div>
+            <div class="detail-card">
+                <h3>✍️ Content Analysis</h3>
+                <p><strong>Classification:</strong> {{ results.content.result }}</p>
+                <p><strong>Confidence:</strong> {{ results.content.confidence }}</p>
+            </div>
+        </div>
+
+        <a href="/" style="display: block; margin-top: 2em; text-align: center;">Analyze Another Email</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,7 @@
+flask
+dnspython
+dkimpy
+pyspf
+scikit-learn
+joblib
+nltk
