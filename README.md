@@ -137,8 +137,5 @@ python spoofer.py
 
 Follow the prompts to enter the recipient's email and the address you wish to forge.
 
-<<<<<<< HEAD
 The test email will be sent. Use its raw source to test the detector.
-=======
-The test email will be sent. Use its raw source to test the detector.
->>>>>>> 83b448efb01894660b2cb1c7227b81bffb887bf1
+
