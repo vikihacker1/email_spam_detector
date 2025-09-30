@@ -83,15 +83,19 @@ def analyze(raw_email):
     alignment = {
         'spf_aligned': False,
         'dkim_aligned': False,
-        'result': "FAIL"
+        'result': "NEUTRAL"  # Default to NEUTRAL, not FAIL
     }
-    # For DKIM, the signed domain must match the From: domain
-    if dkim_result == "PASS" and dkim_domain and dkim_domain.lower() == from_domain.lower():
-        alignment['dkim_aligned'] = True
-
-    # Note: A true SPF alignment check is more complex, but DKIM is key for this scenario.
-    if alignment['dkim_aligned']: # Simplified: if DKIM aligns, we consider it aligned.
-        alignment['result'] = "PASS"
+    
+    # Alignment is only relevant if DKIM passed.
+    if dkim_result == "PASS":
+        # For DKIM, the signed domain must match the From: domain
+        if dkim_domain and from_domain and dkim_domain.lower() == from_domain.lower():
+            alignment['dkim_aligned'] = True
+            alignment['result'] = "PASS"
+        else:
+            # This is the explicit failure case: DKIM passed for the WRONG domain.
+            alignment['dkim_aligned'] = False
+            alignment['result'] = "FAIL"
 
     # --- 3. Content Analysis ---
     content_result, confidence = analyze_email_content(msg)
@@ -102,7 +106,8 @@ def analyze(raw_email):
     
     if dkim_result == "FAIL":
         risk_score += 40
-    if alignment['result'] == "FAIL" and from_domain: # HUGE penalty for misalignment
+    # Misalignment is a very high-risk indicator
+    if alignment['result'] == "FAIL":
         risk_score += 50
     if spf_result == "FAIL":
         risk_score += 20
